@@ -35,7 +35,7 @@ export async function deriveMasterKey(password: string, salt: Uint8Array): Promi
   return await window.crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
-      salt: salt as any, // Cast to any to avoid ArrayBufferLike mismatch in some environments
+      salt: salt as unknown as BufferSource,
       iterations: PBKDF2_ITERATIONS,
       hash: 'SHA-256',
     },
@@ -85,7 +85,7 @@ export async function encryptFile(file: File, key: CryptoKey): Promise<{ ciphert
   const fileBuffer = await file.arrayBuffer();
 
   const ciphertext = await window.crypto.subtle.encrypt(
-    { name: ALGORITHM_AES, iv: iv as any },
+    { name: ALGORITHM_AES, iv: iv as unknown as BufferSource },
     key,
     fileBuffer
   );
@@ -99,9 +99,9 @@ export async function encryptFile(file: File, key: CryptoKey): Promise<{ ciphert
 /**
  * 5. Descriptografia de Arquivo (AES-GCM)
  */
-export async function decryptFile(ciphertext: ArrayBuffer, key: CryptoKey, iv: Uint8Array): Promise<Blob> {
+export async function decryptFile(ciphertext: BufferSource, key: CryptoKey, iv: Uint8Array): Promise<Blob> {
   const plaintext = await window.crypto.subtle.decrypt(
-    { name: ALGORITHM_AES, iv: iv as any },
+    { name: ALGORITHM_AES, iv: iv as unknown as BufferSource },
     key,
     ciphertext
   );
@@ -118,7 +118,7 @@ export async function wrapFileKey(fileKey: CryptoKey, masterKey: CryptoKey): Pro
   const iv = window.crypto.getRandomValues(new Uint8Array(12));
   
   const wrapped = await window.crypto.subtle.encrypt(
-    { name: ALGORITHM_AES, iv: iv as any },
+    { name: ALGORITHM_AES, iv: iv as unknown as BufferSource },
     masterKey,
     exported
   );
@@ -138,7 +138,7 @@ export async function unwrapFileKey(wrappedData: string, masterKey: CryptoKey): 
   const ciphertext = Uint8Array.from(atob(ciphertextStr), c => c.charCodeAt(0));
 
   const decrypted = await window.crypto.subtle.decrypt(
-    { name: ALGORITHM_AES, iv: iv as any },
+    { name: ALGORITHM_AES, iv: iv as unknown as BufferSource },
     masterKey,
     ciphertext
   );
