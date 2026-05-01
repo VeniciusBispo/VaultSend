@@ -35,7 +35,7 @@ export async function deriveMasterKey(password: string, salt: Uint8Array): Promi
   return await window.crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
-      salt,
+      salt: salt as any, // Cast to any to avoid ArrayBufferLike mismatch in some environments
       iterations: PBKDF2_ITERATIONS,
       hash: 'SHA-256',
     },
