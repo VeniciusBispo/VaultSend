@@ -5,7 +5,7 @@ import { Upload, Shield, Share2, Lock, FileText, CheckCircle2 } from 'lucide-rea
 import { encryptFile, generateFileKey, exportKey } from '@/lib/crypto';
 import axios from 'axios';
 
-const API_BASE = 'http://127.0.0.1:3001/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3001/api';
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -81,7 +81,7 @@ export default function Home() {
         ttlHours: 24
       });
 
-      const finalLink = `${window.location.origin}/download/${linkRes.data.id}#key=${keyStr}`;
+      const finalLink = `${window.location.origin}/download?id=${linkRes.data.id}#key=${keyStr}`;
       setShareLink(finalLink);
 
     } catch (error: any) {
