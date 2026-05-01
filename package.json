@@ -1,0 +1,15 @@
+{
+  "name": "vaultsend-root",
+  "version": "1.0.0",
+  "description": "VaultSend Monorepo",
+  "scripts": {
+    "install:all": "npm install && cd api && npm install && cd ../web && npm install",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "cd api && npm run start:dev",
+    "dev:web": "cd web && npm run dev",
+    "test:api": "cd api && npm run test"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
