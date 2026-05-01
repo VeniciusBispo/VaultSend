@@ -4,6 +4,7 @@
   "description": "VaultSend Monorepo",
   "scripts": {
     "install:all": "npm install && cd api && npm install && cd ../web && npm install",
+    "build": "npm run build --prefix web",
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
     "dev:api": "cd api && npm run start:dev",
     "dev:web": "cd web && npm run dev",
