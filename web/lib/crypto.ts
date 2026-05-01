@@ -164,3 +164,14 @@ export async function exportPublicKey(key: CryptoKey): Promise<string> {
   const exported = await window.crypto.subtle.exportKey('spki', key);
   return btoa(String.fromCharCode(...new Uint8Array(exported)));
 }
+
+export async function importKey(keyData: string): Promise<CryptoKey> {
+  const binary = Uint8Array.from(atob(keyData), c => c.charCodeAt(0));
+  return await window.crypto.subtle.importKey(
+    'raw',
+    binary,
+    ALGORITHM_AES,
+    true,
+    ['encrypt', 'decrypt']
+  );
+}
