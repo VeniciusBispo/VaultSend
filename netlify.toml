@@ -8,5 +8,5 @@
   to = "/index.html"
   status = 200
 
-[functions]
-  node_version = "20"
+[build.environment]
+  NODE_VERSION = "20"
