@@ -85,7 +85,7 @@ export async function encryptFile(file: File, key: CryptoKey): Promise<{ ciphert
   const fileBuffer = await file.arrayBuffer();
 
   const ciphertext = await window.crypto.subtle.encrypt(
-    { name: ALGORITHM_AES, iv },
+    { name: ALGORITHM_AES, iv: iv as any },
     key,
     fileBuffer
   );
@@ -101,7 +101,7 @@ export async function encryptFile(file: File, key: CryptoKey): Promise<{ ciphert
  */
 export async function decryptFile(ciphertext: ArrayBuffer, key: CryptoKey, iv: Uint8Array): Promise<Blob> {
   const plaintext = await window.crypto.subtle.decrypt(
-    { name: ALGORITHM_AES, iv },
+    { name: ALGORITHM_AES, iv: iv as any },
     key,
     ciphertext
   );
@@ -118,7 +118,7 @@ export async function wrapFileKey(fileKey: CryptoKey, masterKey: CryptoKey): Pro
   const iv = window.crypto.getRandomValues(new Uint8Array(12));
   
   const wrapped = await window.crypto.subtle.encrypt(
-    { name: ALGORITHM_AES, iv },
+    { name: ALGORITHM_AES, iv: iv as any },
     masterKey,
     exported
   );
@@ -138,7 +138,7 @@ export async function unwrapFileKey(wrappedData: string, masterKey: CryptoKey): 
   const ciphertext = Uint8Array.from(atob(ciphertextStr), c => c.charCodeAt(0));
 
   const decrypted = await window.crypto.subtle.decrypt(
-    { name: ALGORITHM_AES, iv },
+    { name: ALGORITHM_AES, iv: iv as any },
     masterKey,
     ciphertext
   );
