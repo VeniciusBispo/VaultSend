@@ -48,7 +48,7 @@ async function bootstrap() {
 
   // CORS - Explicit for local dev
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'https://vaultsend.netlify.app'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
