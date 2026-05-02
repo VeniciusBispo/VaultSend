@@ -30,7 +30,8 @@ export class FilesService {
     await file.save();
 
     // Mock Presigned URL (Point to our own API for local testing)
-    const uploadUrl = `http://127.0.0.1:3001/api/files/mock-s3/${s3Key.replace(/\//g, '-')}`;
+    const baseUrl = process.env.APP_URL || 'http://127.0.0.1:3001';
+    const uploadUrl = `${baseUrl}/api/files/mock-s3/${s3Key.replace(/\//g, '-')}`;
 
     return {
       fileId: file._id,
@@ -99,8 +100,9 @@ export class FilesService {
 
   async getMultipartUrl(userId: string, uploadId: string, partNumber: number) {
     // In a real app, call s3.getSignedUrl('uploadPart', ...)
+    const baseUrl = process.env.APP_URL || 'http://127.0.0.1:3001';
     return {
-      url: `http://127.0.0.1:3001/api/files/mock-s3/${uploadId}-part-${partNumber}`,
+      url: `${baseUrl}/api/files/mock-s3/${uploadId}-part-${partNumber}`,
     };
   }
 
@@ -113,5 +115,9 @@ export class FilesService {
     );
     if (!file) throw new NotFoundException('Upload not found');
     return file;
+  }
+
+  async getFileById(fileId: string) {
+    return this.fileModel.findById(fileId);
   }
 }

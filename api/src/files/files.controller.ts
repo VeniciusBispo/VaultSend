@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, UseGuards, Request, Put } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, UseGuards, Request, Put, Res } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { FilesService } from './files.service';
 import { InitUploadDto, ConfirmUploadDto } from './dto/file.dto';
@@ -52,6 +52,32 @@ export class FilesController {
     return this.filesService.getMultipartUrl(userId, id, partNumber);
   }
 
+  @Get('download/:id')
+  @ApiOperation({ summary: 'Download a file (Public)' })
+  async downloadFile(@Param('id') id: string, @Res() res) {
+    const fs = require('fs');
+    const path = require('path');
+    const { pipeline } = require('stream/promises');
+
+    // Get metadata to know the size and original name
+    const file = await this.filesService.getFileById(id);
+    if (!file) return res.status(404).send({ message: 'File not found' });
+
+    let i = 1;
+    while (true) {
+      const partKey = `${id}-part-${i}`;
+      const filePath = path.join(process.cwd(), 'uploads', partKey);
+      
+      if (fs.existsSync(filePath)) {
+        await pipeline(fs.createReadStream(filePath), res.raw, { end: false });
+        i++;
+      } else {
+        break;
+      }
+    }
+    res.raw.end();
+  }
+
   @Post('multipart/:id/complete')
   @ApiOperation({ summary: 'Complete a multipart upload' })
   async completeMultipart(@Request() req, @Param('id') id: string) {
@@ -59,10 +85,31 @@ export class FilesController {
     return this.filesService.completeMultipart(userId, id);
   }
 
+  @Get('mock-s3/:key')
+  @ApiOperation({ summary: 'Download from mock S3' })
+  async downloadMockS3(@Param('key') key: string, @Request() req, @Body() body: any) {
+    // Fastify request is in req.raw if needed, but we can just use response
+    const fs = require('fs');
+    const path = require('path');
+    const filePath = path.join(process.cwd(), 'uploads', key);
+    if (!fs.existsSync(filePath)) return { status: 'error', message: 'Not found' };
+    
+    const stream = fs.createReadStream(filePath);
+    return stream;
+  }
+
   @Put('mock-s3/:key')
   @ApiOperation({ summary: 'Mock S3 upload endpoint for testing' })
-  async mockS3Upload(@Param('key') key: string) {
-    console.log(`Receiving mock upload for: ${key}`);
+  async mockS3Upload(@Param('key') key: string, @Body() stream: any) {
+    const fs = require('fs');
+    const path = require('path');
+    const { pipeline } = require('stream/promises');
+    
+    const filePath = path.join(process.cwd(), 'uploads', key);
+    const writeStream = fs.createWriteStream(filePath);
+    
+    await pipeline(stream, writeStream);
+    console.log(`Saved mock upload to: ${filePath}`);
     return { status: 'ok' };
   }
 }

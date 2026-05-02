@@ -22,7 +22,7 @@ export default function Home() {
     try {
       const key = await generateFileKey();
       const keyStr = await exportKey(key);
-      const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB
+      const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB for better stability on free tier
       const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
       const ivBase = window.crypto.getRandomValues(new Uint8Array(12));
       const ivStr = btoa(String.fromCharCode(...ivBase));
@@ -38,7 +38,7 @@ export default function Home() {
 
       // 2. Prepare chunks queue
       const chunkNumbers = Array.from({ length: totalChunks }, (_, i) => i + 1);
-      const CONCURRENCY = 3;
+      const CONCURRENCY = 1; // 1 for better stability on free tier
       let completedChunks = 0;
 
       const uploadPart = async (partNumber: number) => {

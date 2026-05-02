@@ -45,8 +45,8 @@ export class LinksService {
     link.downloadCount += 1;
     await link.save();
 
-    // Mock Presigned URL
-    const downloadUrl = `https://s3.mock-provider.com/${file.s3Key}?signature=mock-public`;
+    const baseUrl = process.env.APP_URL || 'http://127.0.0.1:3001';
+    const downloadUrl = `${baseUrl}/api/files/download/${file._id}`;
 
     return {
       downloadUrl,

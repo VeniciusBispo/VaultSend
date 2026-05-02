@@ -14,10 +14,17 @@ async function bootstrap() {
   // Global Prefix (Set this first!)
   app.setGlobalPrefix('api');
 
-  // Allow raw binary for mock S3 uploads (Consume stream to avoid hanging)
+  // Ensure uploads directory exists
+  const fs = require('fs');
+  const path = require('path');
+  const uploadsDir = path.join(process.cwd(), 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir);
+  }
+
+  // Allow raw binary for mock S3 uploads (Pass stream to controller)
   adapter.getInstance().addContentTypeParser('application/octet-stream', (req, payload, done) => {
-    payload.on('data', () => {});
-    payload.on('end', () => done(null, null));
+    done(null, payload);
   });
 
   // Security Headers (Helmet for Fastify)
