@@ -57,25 +57,43 @@ export class FilesController {
   async downloadFile(@Param('id') id: string, @Res() res) {
     const fs = require('fs');
     const path = require('path');
-    const { pipeline } = require('stream/promises');
+    const { PassThrough } = require('stream');
 
-    // Get metadata to know the size and original name
     const file = await this.filesService.getFileById(id);
     if (!file) return res.status(404).send({ message: 'File not found' });
 
-    let i = 1;
-    while (true) {
-      const partKey = `${id}-part-${i}`;
-      const filePath = path.join(process.cwd(), 'uploads', partKey);
-      
-      if (fs.existsSync(filePath)) {
-        await pipeline(fs.createReadStream(filePath), res.raw, { end: false });
-        i++;
-      } else {
-        break;
+    // Set headers on the Fastify reply
+    res.header('Content-Type', 'application/octet-stream');
+    res.header('Access-Control-Allow-Origin', '*');
+    
+    const stream = new PassThrough();
+    res.send(stream);
+
+    const streamParts = async () => {
+      let i = 1;
+      while (true) {
+        const partKey = `${id}-part-${i}`;
+        const filePath = path.join(process.cwd(), 'uploads', partKey);
+        
+        if (fs.existsSync(filePath)) {
+          const partStream = fs.createReadStream(filePath);
+          partStream.pipe(stream, { end: false });
+          await new Promise((resolve) => {
+            partStream.on('end', resolve);
+            partStream.on('error', resolve); // Move on if part is corrupted
+          });
+          i++;
+        } else {
+          break;
+        }
       }
-    }
-    res.raw.end();
+      stream.end();
+    };
+
+    streamParts().catch(err => {
+      console.error('Streaming error:', err);
+      stream.end();
+    });
   }
 
   @Post('multipart/:id/complete')
