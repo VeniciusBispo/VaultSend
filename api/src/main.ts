@@ -14,9 +14,10 @@ async function bootstrap() {
   // Global Prefix (Set this first!)
   app.setGlobalPrefix('api');
 
-  // Allow raw binary for mock S3 uploads
+  // Allow raw binary for mock S3 uploads (Consume stream to avoid hanging)
   adapter.getInstance().addContentTypeParser('application/octet-stream', (req, payload, done) => {
-    done(null);
+    payload.on('data', () => {});
+    payload.on('end', () => done(null, null));
   });
 
   // Security Headers (Helmet for Fastify)

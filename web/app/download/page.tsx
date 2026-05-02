@@ -104,7 +104,11 @@ function DownloadContent() {
             </div>
             <div className="flex-1 overflow-hidden">
               <p className="text-white font-medium truncate">{atob(metadata.metadata.encryptedName)}</p>
-              <p className="text-slate-500 text-xs">{(metadata.metadata.sizeBytes / 1024 / 1024).toFixed(2)} MB</p>
+              <p className="text-slate-500 text-xs">
+                {metadata.metadata.sizeBytes > 1024 * 1024 
+                  ? `${(metadata.metadata.sizeBytes / 1024 / 1024).toFixed(2)} MB` 
+                  : `${(metadata.metadata.sizeBytes / 1024).toFixed(2)} KB`}
+              </p>
             </div>
           </div>
 
