@@ -81,7 +81,7 @@ export default function Home() {
         ttlHours: 24
       });
 
-      const finalLink = `${window.location.origin}/download?id=${linkRes.data.id}#key=${keyStr}`;
+      const finalLink = `${window.location.origin}/download?id=${linkRes.data._id || linkRes.data.id}#key=${keyStr}`;
       setShareLink(finalLink);
 
     } catch (error: any) {
