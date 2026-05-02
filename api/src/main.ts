@@ -5,7 +5,10 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const adapter = new FastifyAdapter({ logger: true });
+  const adapter = new FastifyAdapter({ 
+    logger: true,
+    bodyLimit: 50 * 1024 * 1024, // 50MB
+  });
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter);
 
   // Global Prefix (Set this first!)

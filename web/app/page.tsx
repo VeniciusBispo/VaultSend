@@ -74,8 +74,11 @@ export default function Home() {
         }
       });
       await Promise.all(workers);
-
-      // 4. Complete
+      
+      // 4. Complete Upload Status
+      await axios.post(`${API_BASE}/files/multipart/${uploadId}/complete`);
+      
+      // 5. Create Share Link
       const linkRes = await axios.post(`${API_BASE}/links`, {
         fileId: uploadId,
         ttlHours: 24
@@ -136,7 +139,11 @@ export default function Home() {
                     {file ? file.name : 'Clique para selecionar um arquivo'}
                   </p>
                   <p className="text-slate-500 text-sm mt-1">
-                    {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : 'Arraste e solte arquivos aqui'}
+                    {file ? (
+                      file.size > 1024 * 1024 
+                        ? `${(file.size / 1024 / 1024).toFixed(2)} MB` 
+                        : `${(file.size / 1024).toFixed(2)} KB`
+                    ) : 'Arraste e solte arquivos aqui'}
                   </p>
                 </div>
               </div>
